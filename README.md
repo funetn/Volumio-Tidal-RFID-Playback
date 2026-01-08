@@ -150,6 +150,61 @@ Note: Because I created by Phoniebox/Mopidy-Tidal system using a PN532 RFID read
 The albums I've tested have successfully played using the rfidmerge.py process.  This process eliminated the need to re-register the rfid tags on the new Volumio-Tidal-RFID-Playback system saving hours/days of work.
 
 
+**Running as a service**
+
+If you prefer to run the RFID as a service do the following:
+
+1) Create a fixed service file (VolumioRFID is the name of your RFID phyton code):
+		sudo nano /etc/systemd/system/VolumioRFID.service
+
+2) Paste the following into the file:
+
+		[Unit]
+		Description=Volumio RFID Tag Reader
+		# Wait for network and Volumio to be ready
+		After=network.target volumio.service
+
+		[Service]
+		Type=simple
+		# Full paths are required
+		ExecStart=/usr/bin/python3 <directory>/VolumioRFID.py  # ← Change if your script name/path is different
+		WorkingDirectory=<location of the VolumioRFID.py file>
+		# Run as the volumio user (common on Volumio systems; change to root if needed)
+		User=volumio
+		Restart=always
+		RestartSec=10
+
+		[Install]
+		WantedBy=multi-user.target
+
+3) Apply the changes by issuing (change VolumioRFID to what you named your program):
+
+		sudo systemctl daemon-reload
+		sudo systemctl enable VolumioRFID.service
+		sudo systemctl start VolumioRFID.service
+		sudo systemctl status VolumioRFID.service
+
+The status should now show active (running) with your script process listed:
+
+$ sudo systemctl status VolumioRFID.service
+
+VolumioRFID.service - Volumio RFID Tag Reader
+
+   Loaded: loaded (/etc/systemd/system/VolumioRFID.service; enabled; vendor preset: enabled)
+
+   Active: active (running) since Wed 2026-01-07 21:57:25 CST; 51min ago
+ 
+ Main PID: 7995 (python3)
+ 
+	Tasks: 4 (limit: 4915)
+   
+   CGroup: /system.slice/VolumioRFID.service
+           └─7995 /usr/bin/python3 <directory & program name>.py # Change if your script name/path is different
+
+Jan 07 21:57:25 volumiorfid systemd[1]: Started Volumio RFID Tag Reader.
+
+
+
 **Caveats & Notes**
 
 Plays full albums only (no single tracks or playlists tested).
@@ -159,6 +214,7 @@ No RFID-based pause/stop/skip — use the Volumio app or web interface.
 If you encounter socketIO-related errors, install/update the required package (e.g., pip3 install python-socketio).
 
 Keep backups of tidal_rfid.py and rfid_lookup.csv seperately from your SD Card/Volumio IMG card.
+
 
 **Sources & Inspiration**
 
