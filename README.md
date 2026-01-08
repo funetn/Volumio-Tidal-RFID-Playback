@@ -142,4 +142,4 @@ Keep backups of tidal_rfid.py and rfid_lookup.csv seperately from your SD Card/V
 		There are prob many others that I ran across doing searches (apologies if I missed you).
 
 
-Thanks to everyone whose code and ideas helped make this possible!
+Thanks to everyone whose approches and ideas helped make this possible!
