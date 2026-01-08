@@ -119,6 +119,37 @@ When you scan a known tag the following will be displayed in the terminal:
 Stop the script with Ctrl+C.  Music will continue playing in Volumio.
 
 
+
+**Migrating your Phoniebox-Mopidy-Tidal RFID tags/enteries**
+
+If you want to migrate your Phoniebox/Mopidy-Tidal RFID tags/album references to your new Volumio-RFID system do the following steps.  They use different methods of finding/queuing the  Tidal music.
+1) From your Phoniebox/Mopidy-Tidal RPI system copy your /home/RPi-Jukebox-RFID/shared folders (shortcuts & audiofolders) to a USB drive. The "shortcut" directory should have files with the RFID as the name and inside the file the Artist-Album verbiage (or however you did things when registering the RFID card in Phoniebox).  The "audiofolders" directory MUST HAVE a "spotify.txt" file.  There might be another file and that's ok.  The "spotify.txt" file contains the Tidal album URI.
+2) Copy this contents to your "Volumio-Tidal-RFID-Playback" RPI.  Note the location you copied it to.  If you are savvy you can probably skip doing this and account for the USB file location below in step 4.
+3) Copy the rfidmerge.py code to the Volumio-Tidal-RFID-Playback RPI.
+4) You will need to update the following based on where/if you copied the USB files to:
+
+		'# Replace these with your actual directory paths
+		DIR1 = '<directory you copied USB to>/shared/shortcuts'  # Directory with rfidtag files
+		DIR2 = '<directory you copied USB to>/shared/audiofolders'  # Base directory containing artist-album subdirectories
+		OUTPUT_CSV = '<location of rfid_lookup.csv>'          # Name of the output CSV file.  The Volumio-Tidal-RFID-Playback.py (or whatever you called it) variable "CSV_FILE" must point to this location/file.
+
+5) Run rfidmerge.py to merge the 2 directories data into a valid record format for the Volumio-Tidal-RFID-Playback.
+6) View the file created by the rfidmerge.py program - cat <name given in OUTPUT_CSV> and check if it looks like <rfidtagnumber>,tidal://album/<artist name - title>.
+7) The 1st line of the file must have tag,uri,artist
+8) The artist name - title will be the verbiage that was contained in the "spotify.txt" file.
+
+Your file should look like this format:
+
+		tag,uri,artist
+		0966145713,tidal://album/36315974,Days of the New - II (Red Cover)
+		0965994017,tidal://album/107690629,The Police - Zenyatta Mondatta
+
+
+Note: Because I created by Phoniebox/Mopidy-Tidal system using a PN532 RFID reader the RFID number is different that what the USB reader was reading.  The rfidmerge.py program also converts the PN532 number to it to the USB correct number (and pads with a leaving 0 to make it 10-digits).  You can search the internet for details on why RFID tags are different between readers for more details.
+
+The albums I've tested have successfully played using the rfidmerge.py process.  This process eliminated the need to re-register the rfid tags on the new Volumio-Tidal-RFID-Playback system saving hours/days of work.
+
+
 **Caveats & Notes**
 
 Plays full albums only (no single tracks or playlists tested).
